@@ -3,6 +3,7 @@ from common import utils
 from uiautomator import Adb
 import threading
 import os
+import sys
 
 
 class BaseClient(object):
@@ -24,8 +25,10 @@ class BaseClient(object):
     def _start_logcat(self):
         log_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, 'log'))
         self._adb_commander.cmd('-s %s logcat -c' % self.udid)
-        self._adb_commander.cmd(' -s %s logcat> %s/%s.log' % (self.udid, log_file_path, self.udid))
+        self._adb_commander.cmd('-s %s logcat> %s/%s.log' % (self.udid, log_file_path, self.udid))
 
-    # def __del__(self):
-    #     pid_name = "adb logcat"
-    #     os.system("pkill %s" % pid_name)
+    def __del__(self):
+        sys.stdout = os.devnull
+        pid_name = ("adb -s %s logcat" % self.udid)
+        os.system('ps -e | grep %s | xargs kill' % pid_name)
+        sys.stdout = sys.__stdout__
