@@ -3,17 +3,16 @@ from common import utils
 from uiautomator import Adb
 import threading
 import os
-import sys
 
 
 class BaseClient(object):
 
-    def __init__(self, udid):
-        self.udid = udid
-        self._adb_commander = Adb(self.udid)
+    def __init__(self, device_id):
+        self.device_id = device_id
+        self._adb_commander = Adb(self.device_id)
         self._logcat_thread = threading.Thread(target=self._start_logcat)
         self._logcat_thread.start()
-        self._device = Device(self.udid)
+        self._device = Device(self.device_id)
 
     def open_app(self):
         self._device.screen.on()
@@ -24,11 +23,5 @@ class BaseClient(object):
 
     def _start_logcat(self):
         log_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, 'log'))
-        self._adb_commander.cmd('-s %s logcat -c' % self.udid)
-        self._adb_commander.cmd('-s %s logcat> %s/%s.log' % (self.udid, log_file_path, self.udid))
-
-    def __del__(self):
-        sys.stdout = os.devnull
-        pid_name = ("adb -s %s logcat" % self.udid)
-        os.system('ps -e | grep %s | xargs kill' % pid_name)
-        sys.stdout = sys.__stdout__
+        self._adb_commander.cmd('logcat -c' % self.device_id)
+        self._adb_commander.cmd('logcat> %s/%s.log' % (log_file_path, self.device_id))
