@@ -1,7 +1,6 @@
 from lib.base_lib import BaseClient
 from common import utils
 import threading
-import os
 
 
 class BaseCase(object):
@@ -22,8 +21,5 @@ class BaseCase(object):
         pass
 
     def _tear_down(self):
-        pass
-
-    def _stop_logcat(self):
-        for device_id in self._device_id_list:
-            os.system("ps -e | grep %s | xargs kill" % device_id)
+        for client in self._clients:
+            client.stop_logcat()
